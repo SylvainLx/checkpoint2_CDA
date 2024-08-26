@@ -11,6 +11,9 @@ class CountryInput implements Partial<Country> {
 
   @Field()
   emoji: string;
+
+  @Field()
+  continent_code: string;
 }
 
 @Resolver(Country)
@@ -20,9 +23,16 @@ export class CountryResolver {
     return await Country.find();
   }
 
-  @Query(() => Country, { nullable: true })
-  async getCountryByCode(@Arg("code") code: string): Promise<Country | null> {
-    return await Country.findOneBy({ code: code });
+  @Query(() => Country)
+  async getCountryByCode(@Arg("code") code: string): Promise<Country> {
+    return await Country.findOneByOrFail({ code: code });
+  }
+
+  @Query(() => [Country], { nullable: true })
+  async getCountryByContinent(
+    @Arg("continent_code") continent_code: string
+  ): Promise<Country[] | null> {
+    return await Country.find({ where: { continent_code: continent_code } });
   }
 
   @Mutation(() => Country)
@@ -33,6 +43,7 @@ export class CountryResolver {
       code: newCountry.code,
       name: newCountry.name,
       emoji: newCountry.emoji,
+      continent_code: newCountry.continent_code,
     }).save();
     return country;
   }
