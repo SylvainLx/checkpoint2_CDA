@@ -39,6 +39,14 @@ export class CountryResolver {
   async createCountry(
     @Arg("data") newCountry: CountryInput
   ): Promise<CountryInput> {
+    const existingCountry = await Country.findOne({
+      where: [{ code: newCountry.code }, { name: newCountry.name }],
+    });
+
+    if (existingCountry) {
+      throw new Error(`Country ${existingCountry.name} already exists`);
+    }
+
     const country = await Country.create({
       code: newCountry.code,
       name: newCountry.name,
